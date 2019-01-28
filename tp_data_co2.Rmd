@@ -1,0 +1,75 @@
+---
+title: "Practical session on CO2 dataset"
+author: "Florent Chuffart - florent.chuffart@univ-grenoble-alpes.fr"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+
+```{r, echo=FALSE, eval=TRUE, label="loading libraries"}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+```
+# Loading data
+
+```{r echo=TRUE, results="verbatim"}
+data(CO2) # charge le jeu de données CO2 interne à R
+head(CO2)
+attach(CO2) # attachement -> pour acceder directement aux variables internes
+names(CO2) <- c("ID_Plante", "Type_Plante", "Traitement", "C_CO2", "Assimilation") # renomage des variables
+CO2.q <- CO2[CO2$Type_Plante=="Quebec",] # données restreintes au quebec
+CO2.m <- CO2[CO2$Type_Plante=="Mississippi",] # données restreintes au mississippi
+
+col.v <- c("black", "gray50") # vecteur de couleurs
+head(CO2)
+```
+
+
+
+# Graphical Analysis
+
+```{r echo=TRUE, results="verbatim"}
+source("MSS2_TD1/TIS4_TD_CodeGraph1.R")
+```
+
+# ANOVA / linear regression
+
+Many approachs:
+
+  - linear regression, but data are note linear (saturation of CO2 assimilation)
+  - linear regression on linear part of the curve (but we do not used the entire data set)
+  - linear regression on transformed data (ex: log(assimilitaion)), but finding good transformation is not easy
+  - ANOVA, but it do not take into account the order of the [CO2]
+
+## ANOVA
+  
+```{r echo=TRUE, results="verbatim"}
+m1 = lm(Assimilation~Type_Plante+Traitement+C_CO2  , data=CO2)
+anova(m1)
+summary(m1)
+
+CO2$C_CO2_fact = as.factor(CO2$C_CO2)
+m2 = lm(Assimilation~Type_Plante+Traitement+C_CO2_fact  , data=CO2)
+anova(m2)
+summary(m2)
+```
+
+Even if m1 is more free than m2 (df1 > df2), 
+m1 is less powerfull than m2 (Rsquare2 > Rsquare1).
+
+# Logictic regression
+
+```{r echo=TRUE, results="verbatim"}
+```
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
