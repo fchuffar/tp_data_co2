@@ -29,22 +29,133 @@ col.v <- c("black", "gray50") # vecteur de couleurs
 head(CO2)
 ```
 
+# Graphical Analysis 
 
-
-# Graphical Analysis
+Traitement ~ Type_Plante+C_CO2+Assimilation
 
 ```{r echo=TRUE, results="verbatim"}
 source("MSS2_TD1/TIS4_TD_CodeGraph1.R")
+detach(CO2)
+
 ```
 
-# ANOVA / linear regression
+# Question 1
 
-Many approachs:
+How *food* availability explain *growth* of plants in "Quebec" population.
 
-  - linear regression, but data are note linear (saturation of CO2 assimilation)
-  - linear regression on linear part of the curve (but we do not used the entire data set)
-  - linear regression on transformed data (ex: log(assimilitaion)), but finding good transformation is not easy
-  - ANOVA, but it do not take into account the order of the [CO2]
+```{r echo=TRUE, results="verbatim"}
+d = data.frame(
+  growth = CO2.q$Assimilation ,
+  food =   CO2.q$C_CO2           
+)
+```
+
+Several approaches:
+
+  - linear regression, easy but data are not linear,
+  - focus on linear part of the curve, it works but a part of the information is lost
+  - linear regression on transformed data, it is better but it‘s difficult to find a good transformation function, candidate are log transformation, single exponential model... )
+  - ANOVA, a part of the information is lost and the ANOVA has less degree of freedom, but with a good experimental design and enough replicates this model could better explain the data.
+
+## Linear regression  
+
+$$growth \sim food$$
+  
+```{r echo=TRUE, results="verbatim"}
+m = lm(growth ~ food, d)
+```
+
+Explained variance is poor.
+
+```{r echo=TRUE, results="verbatim"}
+summary(m)
+```
+Linear regression is not a good model, *growth* curve reached a plateau (fig).
+Linear regression seems better with log transformation of *food*.
+
+```{r echo=TRUE, results="verbatim"}
+d$l2food = log2(d$food)
+```
+
+
+```{r}
+# README RStudio config, uncheck: # preferences > R Markdown > show output inline for... 
+layout(matrix(1:2, 1, byrow=TRUE), respect=TRUE)
+plot(d$food, d$growth, main="growth~food")
+## Model
+# Y~X
+# E(Y) = b.X
+# E(Y) = b_0 + b_1.X
+# Y_i = b_0 + b_1.X_i + e_i
+m = lm(growth ~ food, d)
+# summary(m)
+# m$coefficients
+# anova(m)
+abline(a=m$coefficients[[1]], b=m$coefficients[[2]], col=2) # /!\ y = b.x + a
+# residuals
+# m$residuals
+arrows(d$food, d$growth, d$food, d$growth-m$residuals, col=adjustcolor(4, alpha.f=0.5), length=0.1)
+legend("topleft",c("regression line", "residuals"), col=c(2,4), lty=1, cex=.8)
+
+plot(d$l2food, d$growth, main="growth~log(food)")
+m = lm(growth ~ l2food, d)
+abline(a=m$coefficients[[1]], b=m$coefficients[[2]], col=2) # /!\ y = b.x + a
+arrows(d$l2food, d$growth, d$l2food, d$growth-m$residuals, col=adjustcolor(4, alpha.f=0.5), length=0.1)
+legend("topleft",c("regression line", "residuals"), col=c(2,4), lty=1, cex=.8)
+```
+
+$$growth \sim log(food)$$
+
+
+Variance is better explained be this model.
+
+```{r echo=TRUE, results="verbatim"}
+summary(m)
+```
+
+In ANOVA, we consider food as a factor. The experimental design reveals 6 replicates per condition.
+
+```{r echo=TRUE, results="verbatim"}
+table(d$food)
+```
+
+$$growth \sim food$$
+
+```{r}
+d$ffood = as.factor(d$food)
+layout(matrix(1:2, 1, byrow=TRUE), respect=TRUE)
+p = plot(d$ffood, d$growth, main="growth~food", las=2)
+m = lm(growth ~ ffood, d)
+ffood = jitter(as.numeric(d$ffood))
+arrows(ffood, d$growth, ffood, d$growth-m$residuals, col=adjustcolor(4, alpha.f=0.5), length=0.1)
+legend("topleft","residuals", col=4, lty=1, cex=.8)
+```
+
+In our case, variance is fare better explained by the ANOVA.
+
+```{r echo=TRUE, results="verbatim"}
+summary(m)
+```
+
+Residual analysis reveals...
+
+```{r echo=TRUE, results="verbatim"}
+hist(m$residuals)
+shapiro.test(m$residuals)
+```
+
+Explained variance...
+
+```{r echo=TRUE, results="verbatim"}
+```
+
+
+
+
+
+
+
+
 
 ## ANOVA
   
@@ -61,11 +172,6 @@ summary(m2)
 
 Even if m1 is more free than m2 (df1 > df2), 
 m1 is less powerfull than m2 (Rsquare2 > Rsquare1).
-
-# Logictic regression
-
-```{r echo=TRUE, results="verbatim"}
-```
 
 # Session Information
 
