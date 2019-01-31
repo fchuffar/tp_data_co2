@@ -1,6 +1,6 @@
 ---
 title: "Practical session on CO2 dataset"
-author: "Florent Chuffart - florent.chuffart@univ-grenoble-alpes.fr"
+author: "Florent Chuffart & Nicolas Glade"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_document:
@@ -29,19 +29,16 @@ col.v <- c("black", "gray50") # vecteur de couleurs
 head(CO2)
 ```
 
-# Graphical Analysis 
-
-Traitement ~ Type_Plante+C_CO2+Assimilation
+# Graphical Analysis (by Nicolas Glade)
 
 ```{r echo=TRUE, results="verbatim"}
 source("MSS2_TD1/TIS4_TD_CodeGraph1.R")
 detach(CO2)
-
 ```
 
-# Question 1
+# Modelizations
 
-How *food* availability explain *growth* of plants in "Quebec" population.
+How *food* availability explains *growth* of plants in "Quebec" population?
 
 ```{r echo=TRUE, results="verbatim"}
 d = data.frame(
@@ -53,11 +50,11 @@ d = data.frame(
 Several approaches:
 
   - linear regression, easy but data are not linear,
-  - focus on linear part of the curve, it works but a part of the information is lost
-  - linear regression on transformed data, it is better but it‘s difficult to find a good transformation function, candidate are log transformation, single exponential model... )
+  - focus on linear part of the curve, it works but a part of the information is lost,
+  - linear regression on transformed data, it is better but it‘s difficult to find a good transformation function, candidate are log transformation, single exponential model... ),
   - ANOVA, a part of the information is lost and the ANOVA has less degree of freedom, but with a good experimental design and enough replicates this model could better explain the data.
 
-## Linear regression  
+## Linear regression
 
 $$growth \sim food$$
   
@@ -104,6 +101,8 @@ arrows(d$l2food, d$growth, d$l2food, d$growth-m$residuals, col=adjustcolor(4, al
 legend("topleft",c("regression line", "residuals"), col=c(2,4), lty=1, cex=.8)
 ```
 
+## Linear regression on log transformed data
+
 $$growth \sim log(food)$$
 
 
@@ -113,7 +112,11 @@ Variance is better explained be this model.
 summary(m)
 ```
 
-In ANOVA, we consider food as a factor. The experimental design reveals 6 replicates per condition.
+## ANOVA 
+
+In ANOVA, we consider *food* as a factor. 
+
+The experimental design reveals 6 replicates per condition.
 
 ```{r echo=TRUE, results="verbatim"}
 table(d$food)
@@ -137,41 +140,14 @@ In our case, variance is fare better explained by the ANOVA.
 summary(m)
 ```
 
-Residual analysis reveals...
-
-```{r echo=TRUE, results="verbatim"}
-hist(m$residuals)
-shapiro.test(m$residuals)
-```
-
-Explained variance...
-
-```{r echo=TRUE, results="verbatim"}
-```
 
 
 
 
+# Discussion
 
+...
 
-
-
-
-## ANOVA
-  
-```{r echo=TRUE, results="verbatim"}
-m1 = lm(Assimilation~Type_Plante+Traitement+C_CO2  , data=CO2)
-anova(m1)
-summary(m1)
-
-CO2$C_CO2_fact = as.factor(CO2$C_CO2)
-m2 = lm(Assimilation~Type_Plante+Traitement+C_CO2_fact  , data=CO2)
-anova(m2)
-summary(m2)
-```
-
-Even if m1 is more free than m2 (df1 > df2), 
-m1 is less powerfull than m2 (Rsquare2 > Rsquare1).
 
 # Session Information
 
