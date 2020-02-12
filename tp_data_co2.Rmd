@@ -144,10 +144,39 @@ summary(m)
 
 
 
-# Discussion
+# Prediction
 
-...
+'''{r eavl=FALSE}
+CO2_train = CO2
+CO2_test = CO2
+m = glm(Type~Treatment+conc+uptake, CO2_train, family =binomial(link = 'logit'))
+pred = predict.glm(m, newdata = CO2_test, type = "response")
+plot(pred~CO2_test$Type)
+pred_type = ifelse(pred>0.5, "Mississippi", "Quebec")
+paste(round(sum(pred_type == CO2_test$Type) / nrow(CO2) * 100, 2), "% de bonne prédiction")
 
+
+CO2$conc_fact = as.factor(CO2$conc)
+CO2_train = CO2
+CO2_test = CO2
+m = glm(Type~Treatment+conc_fact+uptake, CO2_train, family =binomial(link = 'logit'))
+pred = predict.glm(m, newdata = CO2_test, type = "response")
+plot(pred~CO2_test$Type)
+pred_type = ifelse(pred>0.5, "Mississippi", "Quebec")
+paste(round(sum(pred_type == CO2_test$Type) / nrow(CO2) * 100, 2), "% de bonne prédiction")
+
+
+CO2$conc_fact = as.factor(CO2$conc)
+idx_train = sample(1:nrow(CO2), 63)
+idx_test = setdiff(1:nrow(CO2), idx_train)
+CO2_train = CO2[idx_train,]
+CO2_test = CO2[idx_test,]
+m = glm(Type~Treatment+conc+uptake, CO2_train, family =binomial(link = 'logit'))
+pred = predict.glm(m, newdata = CO2_test, type = "response")
+plot(pred~CO2_test$Type)
+pred_type = ifelse(pred>0.5, "Mississippi", "Quebec")
+paste(round(sum(pred_type == CO2_test$Type) / nrow(CO2_test) * 100, 2), "% de bonne prédiction")
+'''
 
 # Session Information
 
